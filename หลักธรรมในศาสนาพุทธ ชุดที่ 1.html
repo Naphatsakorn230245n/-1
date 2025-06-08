@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>แบบทดสอบความรู้ - Modern Style</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap');
+
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Prompt', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    .container {
+      background: #1f2937; /* dark slate */
+      border-radius: 20px;
+      width: 100%;
+      max-width: 600px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .title {
+      font-weight: 700;
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #facc15, #f43f5e, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient-move 5s ease infinite;
+      user-select: none;
+    }
+
+    @keyframes gradient-move {
+      0% {background-position: 0%;}
+      50% {background-position: 100%;}
+      100% {background-position: 0%;}
+    }
+
+    #question-text {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+      min-height: 60px;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    #options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    .btn {
+      background: #374151; /* gray-700 */
+      border: none;
+      padding: 1rem 1.25rem;
+      border-radius: 15px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      user-select: none;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+      outline: none;
+    }
+
+    .btn:hover:not(.disabled):not(.correct):not(.incorrect) {
+      background: #4f46e5; /* indigo-600 */
+      box-shadow: 0 12px 20px rgba(79,70,229,0.6);
+      transform: translateY(-3px);
+    }
+
+    .btn:active:not(.disabled):not(.correct):not(.incorrect) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 10px rgba(79,70,229,0.4);
+    }
+
+    /* เมื่อเลือกคำตอบแล้วปุ่มจะเปลี่ยนสี */
+    .btn.correct {
+      background-color: #10b981; /* emerald */
+      box-shadow: 0 12px 30px rgba(16,185,129,0.7);
+      cursor: default;
+      animation: pulseCorrect 1.5s infinite;
+    }
+
+    .btn.incorrect {
+      background-color: #ef4444; /* red-500 */
+      box-shadow: 0 12px 30px rgba(239,68,68,0.7);
+      cursor: default;
+      animation: pulseIncorrect 1.5s infinite;
+    }
+
+    @keyframes pulseCorrect {
+      0%, 100% { box-shadow: 0 12px 30px rgba(16,185,129,0.7); }
+      50% { box-shadow: 0 12px 40px rgba(16,185,129,1); }
+    }
+
+    @keyframes pulseIncorrect {
+      0%, 100% { box-shadow: 0 12px 30px rgba(239,68,68,0.7); }
+      50% { box-shadow: 0 12px 40px rgba(239,68,68,1); }
+    }
+
+    /* ปิดปุ่มหลังเลือกคำตอบ */
+    .btn.disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .progress-container {
+      background: #4b5563; /* gray-600 */
+      border-radius: 10px;
+      overflow: hidden;
+      height: 12px;
+      margin-bottom: 2rem;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #f43f5e, #3b82f6, #facc15);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 10px;
+      box-shadow: 0 0 10px #f43f5e, 0 0 20px #3b82f6;
+    }
+
+    /* Summary page */
+    #summary-page {
+      color: #fff;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    #score-text {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      background: linear-gradient(90deg, #facc15, #f43f5e, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      white-space: normal;    /* ให้ข้อความพับบรรทัด */
+      overflow: visible;      /* เอา scroll ออก */
+      padding: 0 10px;
+      text-shadow: 0 0 5px rgba(255,255,255,0.2);
+      user-select: none;
+    }
+
+    #percent-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #facc15;
+      text-shadow: 0 0 8px #facc15;
+      user-select: none;
+    }
+
+    #correct-wrong {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      user-select: none;
+    }
+
+    #correct-wrong span {
+      margin: 0 1rem;
+    }
+
+    #correct-wrong .correct-count {
+      color: #10b981;
+      text-shadow: 0 0 5px #10b981;
+    }
+
+    #correct-wrong .wrong-count {
+      color: #ef4444;
+      text-shadow: 0 0 5px #ef4444;
+    }
+
+    .summary-card {
+      background: #374151;
+      padding: 1rem;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+      user-select: none;
+    }
+
+    .summary-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.5);
+    }
+
+    .summary-card.correct {
+      border-left: 5px solid #10b981;
+    }
+
+    .summary-card.incorrect {
+      border-left: 5px solid #ef4444;
+    }
+
+    .summary-card h4 {
+      margin: 0 0 0.5rem 0;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .summary-card p {
+      margin: 0.25rem 0;
+      font-size: 0.95rem;
+      color: #d1d5db;
+    }
+
+    button.restart-btn {
+      display: block;
+      margin: 2rem auto 0;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(90deg, #3b82f6, #f43f5e);
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(244,62,94,0.6);
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    button.restart-btn:hover {
+      box-shadow: 0 15px 40px rgba(244,62,94,0.9);
+      transform: scale(1.05);
+    }
+
+    /* Fade in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        padding: 1.5rem 1.5rem;
+        border-radius: 15px;
+      }
+
+      .title {
+        font-size: 1.5rem;
+      }
+
+      #question-text {
+        font-size: 1.1rem;
+      }
+
+      .btn {
+        font-size: 1rem;
+        padding: 0.85rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <div id="start-page">
+	  <h1 class="title" style="text-align:center; margin-bottom:0.3rem;">🧘 พระพุทธศาสนา 🧘</h1>
+<h2 style="text-align:center; color:#ffffff; font-weight: 500; margin-top:0; margin-bottom:1.5rem;">
+  <span style="text-decoration: underline;">
+    เรื่อง หลักธรรมในศาสนาพุทธ
+  </span>
+  <span style="display:block; margin-top:0.5rem; color:#ff6f61; font-weight: 700; font-size: 1.3rem; letter-spacing: 0.05em;">
+    📖 จำนวนข้อสอบ: <span id="questionCount"></span> ข้อ ✨
+  </span>
+</h2>
+
+<button class="btn" style="max-width:200px; margin: 0 auto; display: block;" onclick="startQuiz()">เริ่มทำแบบทดสอบ</button>
+
+    </div>
+
+    <div id="quiz-page" style="display:none;">
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div id="question-text"></div>
+      <div id="options"></div>
+    </div>
+
+    <div id="summary-page" style="display:none;"></div>
+  </div>
+
+<script> 
+
+  const questions = [
+  {
+    "question": "อริยสัจ 4 มีทั้งหมดกี่ข้อ?",
+    "options": ["3 ข้อ", "4 ข้อ", "5 ข้อ", "8 ข้อ"],
+    "answer": "4 ข้อ"
+  },
+  {
+    "question": "ข้อใดคือข้อแรกของอริยสัจ 4?",
+    "options": ["ทุกข์", "สมุทัย", "นิโรธ", "มรรค"],
+    "answer": "ทุกข์"
+  },
+  {
+    "question": "อริยมรรค 8 มีข้อใดบ้าง?",
+    "options": ["สัมมาทิฏฐิ, สัมมาวาจา, สัมมาสมาธิ", "ศีล, สมาธิ, ปัญญา", "ทาน, ศีล, ภาวนา", "วิปัสสนา, สมาธิ, สติ"],
+    "answer": "สัมมาทิฏฐิ, สัมมาวาจา, สัมมาสมาธิ"
+  },
+  {
+    "question": "คำว่า “สัมมาทิฏฐิ” หมายถึงอะไร?",
+    "options": ["ความเห็นชอบ", "การพูดชอบ", "การกระทำชอบ", "ความเพียรชอบ"],
+    "answer": "ความเห็นชอบ"
+  },
+  {
+    "question": "ขันธ์ 5 ประกอบด้วยอะไรบ้าง?",
+    "options": ["รูป, เวทนา, สัญญา, สังขาร, วิญญาณ", "ศีล, สมาธิ, ปัญญา, เมตตา, กรุณา", "ความรู้, ความจำ, ความคิด, ความรู้สึก, ความปรารถนา", "อสุภะ, อนิจจัง, ทุกขัง, อนัตตา, นิพพาน"],
+    "answer": "รูป, เวทนา, สัญญา, สังขาร, วิญญาณ"
+  },
+  {
+    "question": "ไตรลักษณ์ มีอะไรบ้าง?",
+    "options": ["อนิจจัง, ทุกขัง, อนัตตา", "รูป, เวทนา, สัญญา", "ทาน, ศีล, ภาวนา", "สติ, สมาธิ, ปัญญา"],
+    "answer": "อนิจจัง, ทุกขัง, อนัตตา"
+  },
+  {
+    "question": "ศีล 5 ข้อใดถูกต้อง?",
+    "options": ["ไม่พูดโกหก, ไม่ดื่มสุรา, ไม่ฆ่าสัตว์", "ไม่กินเนื้อสัตว์, ไม่พูดโกหก, ไม่ดื่มน้ำ", "ไม่พูดโกหก, ไม่เล่นการพนัน, ไม่ฆ่าสัตว์", "ไม่กินเนื้อสัตว์, ไม่เล่นการพนัน, ไม่พูดโกหก"],
+    "answer": "ไม่พูดโกหก, ไม่ดื่มสุรา, ไม่ฆ่าสัตว์"
+  },
+  {
+    "question": "“ตนเป็นที่พึ่งแห่งตน” หมายความว่าอย่างไร?",
+    "options": ["ต้องพึ่งคนอื่นเสมอ", "ต้องดูแลตนเองด้วยปัญญา", "ต้องพึ่งเงินทอง", "ต้องพึ่งโชคชะตา"],
+    "answer": "ต้องดูแลตนเองด้วยปัญญา"
+  },
+  {
+    "question": "คำว่า “ปฏิจจสมุปบาท” หมายถึงอะไร?",
+    "options": ["ทุกสิ่งเกิดขึ้นเพราะเหตุปัจจัย", "การทำสมาธิ", "การรู้แจ้งในธรรม", "การบำเพ็ญทาน"],
+    "answer": "ทุกสิ่งเกิดขึ้นเพราะเหตุปัจจัย"
+  },
+  {
+    "question": "คำสอนแรกที่พระพุทธเจ้าทรงแสดงหลังตรัสรู้ คือข้อใด?",
+    "options": ["ธัมมจักกัปปวัตตนสูตร", "อริยสัจ 4", "ศีล 5", "มรรค 8"],
+    "answer": "ธัมมจักกัปปวัตตนสูตร"
+  },
+  {
+    "question": "สมาธิหมายถึงอะไร?",
+    "options": ["การตั้งใจฟัง", "การฝึกใจให้ตั้งมั่นและสงบ", "การเจริญเมตตา", "การพูดจาไพเราะ"],
+    "answer": "การฝึกใจให้ตั้งมั่นและสงบ"
+  },
+  {
+    "question": "ปัญญาในทางพุทธศาสนา หมายถึงอะไร?",
+    "options": ["ความรู้ทั่ว ๆ ไป", "ความรู้แจ้งเห็นจริงในธรรมชาติของสรรพสิ่ง", "ความรู้ทางวิทยาศาสตร์", "ความสามารถในการคำนวณ"],
+    "answer": "ความรู้แจ้งเห็นจริงในธรรมชาติของสรรพสิ่ง"
+  },
+  {
+    "question": "ข้อใดเป็นสาเหตุของทุกข์ตามอริยสัจ 4?",
+    "options": ["ตัณหา (ความอยาก)", "ความสุข", "การนอนหลับ", "ความรู้"],
+    "answer": "ตัณหา (ความอยาก)"
+  },
+  {
+    "question": "การเจริญเมตตา หมายถึงอะไร?",
+    "options": ["การให้ทาน", "การปลูกฝังความรัก ความเมตตา และกรุณาต่อผู้อื่น", "การทำสมาธิ", "การรักษาศีล"],
+    "answer": "การปลูกฝังความรัก ความเมตตา และกรุณาต่อผู้อื่น"
+  },
+  {
+    "question": "ถ้าต้องการดับทุกข์ ต้องปฏิบัติตามข้อใด?",
+    "options": ["ศีล 5", "มรรค 8", "ไตรลักษณ์", "ขันธ์ 5"],
+    "answer": "มรรค 8"
+  },
+  {
+    "question": "ในอริยมรรค 8 ข้อใดหมายถึงการพูดจาชอบ?",
+    "options": ["สัมมาวาจา", "สัมมากัมมันตะ", "สัมมาสมาธิ", "สัมมาทิฏฐิ"],
+    "answer": "สัมมาวาจา"
+  },
+  {
+    "question": "ขันธ์ 5 คืออะไร?",
+    "options": ["ส่วนประกอบของตัวตน", "ศีล 5 ข้อ", "วิปัสสนา 5 ขั้น", "อริยสัจ 5 ประการ"],
+    "answer": "ส่วนประกอบของตัวตน"
+  },
+  {
+    "question": "หลักไตรลักษณ์ สอนให้เรารู้ว่าทุกสิ่งมีลักษณะอย่างไร?",
+    "options": ["เที่ยง, สุข, ตัวตน", "ไม่เที่ยง, ทุกข์, ไม่มีตัวตน", "เที่ยง, ทุกข์, ไม่มีตัวตน", "ไม่เที่ยง, สุข, ตัวตน"],
+    "answer": "ไม่เที่ยง, ทุกข์, ไม่มีตัวตน"
+  },
+  {
+    "question": "คำว่า “สัมมาวายามะ” หมายถึงอะไร?",
+    "options": ["ความเพียรชอบ", "การพูดจาชอบ", "การตั้งใจเรียน", "การทำสมาธิ"],
+    "answer": "ความเพียรชอบ"
+  },
+  {
+    "question": "การเจริญสติในพุทธศาสนา มีจุดประสงค์เพื่ออะไร?",
+    "options": ["เพื่อให้มีความจำดี", "เพื่อให้รู้ตัว รู้ใจ ในปัจจุบันขณะ", "เพื่อพูดจาสุภาพ", "เพื่อรักษาศีล"],
+    "answer": "เพื่อให้รู้ตัว รู้ใจ ในปัจจุบันขณะ"
+  }
+    
+    
+    // เพิ่มคำถามตามต้องการได้เลย
+  ];
+  
+  const totalQuestions = questions.length;
+document.getElementById('questionCount').textContent = totalQuestions;
+
+  let currentIndex = 0;
+  let score = 0;
+  let correctAnswers = 0;
+  let wrongAnswers = 0;
+  const userAnswers = [];  // เก็บคำตอบที่ผู้ใช้เลือก
+
+  const startPage = document.getElementById('start-page');
+  const quizPage = document.getElementById('quiz-page');
+  const summaryPage = document.getElementById('summary-page');
+  const questionText = document.getElementById('question-text');
+  const optionsDiv = document.getElementById('options');
+  const progressBar = document.getElementById('progress-bar');
+
+  function startQuiz() {
+    startPage.style.display = 'none';
+    summaryPage.style.display = 'none';
+    quizPage.style.display = 'block';
+    currentIndex = 0;
+    score = 0;
+    correctAnswers = 0;
+    wrongAnswers = 0;
+    userAnswers.length = 0; // เคลียร์คำตอบเก่า
+    showQuestion();
+    updateProgressBar();
+  }
+
+  function showQuestion() {
+    questionText.style.opacity = '0';
+    optionsDiv.style.opacity = '0';
+
+    setTimeout(() => {
+      const q = questions[currentIndex];
+      questionText.textContent = `🧐: ${q.question}`;
+      optionsDiv.innerHTML = '';
+
+      q.options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.classList.add('btn');
+        btn.textContent = option;
+        btn.onclick = () => selectAnswer(btn, option);
+        optionsDiv.appendChild(btn);
+      });
+
+      questionText.style.opacity = '1';
+      optionsDiv.style.opacity = '1';
+    }, 500);
+  }
+
+  function selectAnswer(button, selectedOption) {
+    const q = questions[currentIndex];
+    const buttons = optionsDiv.querySelectorAll('button');
+
+    buttons.forEach(btn => {
+      btn.classList.add('disabled');
+      btn.onclick = null;
+    });
+
+    userAnswers[currentIndex] = selectedOption;  // เก็บคำตอบที่เลือก
+
+    if (selectedOption === q.answer) {
+      button.classList.add('correct');
+      score++;
+      correctAnswers++;
+    } else {
+      button.classList.add('incorrect');
+      wrongAnswers++;
+      buttons.forEach(btn => {
+        if (btn.textContent === q.answer) {
+          btn.classList.add('correct');
+        }
+      });
+    }
+
+    setTimeout(() => {
+      currentIndex++;
+      if (currentIndex < questions.length) {
+        showQuestion();
+        updateProgressBar();
+      } else {
+        showSummary();
+      }
+    }, 1200);
+  }
+
+  function updateProgressBar() {
+    const percent = ((currentIndex) / questions.length) * 100;
+    progressBar.style.width = percent + '%';
+  }
+
+  function showSummary() {
+    quizPage.style.display = 'none';
+    summaryPage.style.display = 'block';
+
+    const percentScore = Math.round((score / questions.length) * 100);
+
+    let message = '';
+    if (percentScore >= 80) {
+      message = 'เยี่ยมมาก! คุณทำคะแนนได้สูงมาก 🎉';
+    } else if (percentScore >= 50) {
+      message = 'ดีมาก! คุณทำได้ดี 👍';
+    } else {
+      message = 'ลองใหม่อีกครั้งนะครับ! คุณทำได้แน่นอน 😊';
+    }
+
+    // สร้างเฉลยคำถามทั้งหมด
+    let answerSummaryHTML = '';
+    questions.forEach((q, idx) => {
+      const userAns = userAnswers[idx] || '-';
+      const isCorrect = userAns === q.answer;
+      answerSummaryHTML += `
+        <div class="summary-card ${isCorrect ? 'correct' : 'incorrect'}">
+          <h4>คำถามที่ ${idx + 1}: ${q.question}</h4>
+          <p>คำตอบที่ถูกต้อง: <strong>${q.answer}</strong></p>
+          <p>คำตอบของคุณ: <strong>${userAns}</strong></p>
+        </div>
+      `;
+    });
+
+ summaryPage.innerHTML = `
+  <h2 id="score-text">คะแนนของคุณคือ ${score} / ${questions.length} (${percentScore}%)</h2>
+  <p id="correct-wrong">
+    <span class="correct-count">✔️ ถูกต้อง: ${correctAnswers}</span>
+    <span class="wrong-count">❌ ผิด: ${wrongAnswers}</span>
+  </p>
+  <p style="text-align:center; font-weight:600; font-size:1.1rem; margin-bottom:1rem;">${message}</p>
+  ${answerSummaryHTML}
+  <button class="restart-btn" onclick="startQuiz()">ทำแบบทดสอบอีกครั้ง</button>
+`;
+
+  }
+</script>
+
+</body>
+</html>
